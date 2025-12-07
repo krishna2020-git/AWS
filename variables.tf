@@ -7,7 +7,7 @@ variable "aws_region" {
 variable "ami_id" {
   type        = string
   description = "AMI ID for the EC2 instance"
-  default     = "ami-02b8269d5e85954ef"  # Amazon Linux 2 AMI for us-east-1
+  default     = "ami-02b8269d5e85954ef" # Amazon Linux 2 AMI for us-east-1
 }
 
 variable "instance_type" {
@@ -19,5 +19,5 @@ variable "instance_type" {
 variable "key_name" {
   type        = string
   description = "EC2 Key Pair name for SSH access"
-  default     = ""  # Provide your key pair name
+  default     = "aws-key" # Provide your key pair name
 }
