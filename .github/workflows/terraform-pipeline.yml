@@ -42,12 +42,13 @@ jobs:
         run: terraform init -input=false
 
   # ---------------- VALIDATE ----------------
-   validate:
+  validate:
     runs-on: ubuntu-latest
     needs: pre
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -66,7 +67,6 @@ jobs:
       - name: Terraform validate
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform validate
-
 
   # ---------------- BUILD: Plan ----------------
   build:
