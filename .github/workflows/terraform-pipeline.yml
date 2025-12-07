@@ -15,7 +15,7 @@ env:
   TF_WORKING_DIR: ./
 
 jobs:
-  # .pre stage: fmt + init
+  # ---------------- PRE: fmt + init ----------------
   pre:
     runs-on: ubuntu-latest
     steps:
@@ -41,103 +41,4 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform init -input=false
 
-  # validate stage
-validate:
-  runs-on: ubuntu-latest
-  needs: pre
-  steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v3
-      with:
-        terraform_version: 1.9.8
-
-    - name: Terraform init (for validate)
-      working-directory: ${{ env.TF_WORKING_DIR }}
-      run: terraform init -input=false
-
-    - name: Terraform validate
-      working-directory: ${{ env.TF_WORKING_DIR }}
-      run: terraform validate
-
-
-  # build stage: plan
-  build:
-    runs-on: ubuntu-latest
-    needs: validate
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.9.8
-
-      - name: Terraform plan
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform plan -input=false -out=tfplan
-
-  # deploy stage: apply (manual only)
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.event_name == 'workflow_dispatch'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.9.8
-
-      - name: Terraform init (ensure backend)
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform init -input=false
-
-      - name: Terraform apply
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform apply -input=false -auto-approve tfplan
-
-  # destroy stage: destroy (manual only)
-  destroy:
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.event_name == 'workflow_dispatch'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.9.8
-
-      - name: Terraform init (ensure backend)
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform init -input=false
-
-      - name: Terraform destroy
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform destroy -auto-approve
+  # -----
